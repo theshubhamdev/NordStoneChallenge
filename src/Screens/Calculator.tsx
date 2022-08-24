@@ -1,25 +1,49 @@
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, Alert, Text} from 'react-native';
 import React, {useState} from 'react';
 import {CustomButton, CustomInput} from '../Components';
 import {useForm} from 'react-hook-form';
 import DropDownPicker from 'react-native-dropdown-picker';
+import {calculate} from '../Utils/calculate';
 
 type IFormProps = {
   number1: number;
   number2: number;
-  operator: 'Multiply' | 'Add' | 'Subtract';
 };
 const Calculator = () => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
-  const items = [
-    {label: 'Multiply', value: 'Multiply'},
-    {label: 'Add', value: 'Add'},
-    {label: 'Subtract', value: 'Subtract'},
-  ];
-  const {control} = useForm<IFormProps>();
+  const [loading, setLoading] = useState(false);
+  const [answer, setAnswer] = useState(0);
 
-  const handleSubmit = () => {};
+  const items = [
+    {label: 'Multiply', value: 'multiplication'},
+    {label: 'Add', value: 'addition'},
+    {label: 'Subtract', value: 'subtraction'},
+  ];
+  const {control, getValues} = useForm<IFormProps>();
+
+  const handleSubmit = async () => {
+    if (loading) {
+      return;
+    }
+    if (!value || !getValues().number1 || !getValues().number2) {
+      Alert.alert('Error', 'Please enter valid inputs');
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await calculate(
+        value,
+        getValues().number1,
+        getValues().number2,
+      );
+      setAnswer(response);
+    } catch (error) {
+      Alert.alert('Error');
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <View style={styles.root}>
       <CustomInput
@@ -39,7 +63,11 @@ const Calculator = () => {
         setOpen={setOpen}
         setValue={setValue}
       />
-      <CustomButton text="Calculate" onPress={handleSubmit} />
+      <CustomButton
+        text={loading ? 'Calculating...' : 'Calculate'}
+        onPress={handleSubmit}
+      />
+      <Text style={styles.answer}>{answer}</Text>
     </View>
   );
 };
@@ -51,6 +79,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  answer: {
+    fontSize: 20,
+    color: 'white',
   },
 });
 
