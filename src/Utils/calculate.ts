@@ -1,5 +1,3 @@
-// https://calculator-nordstone.herokuapp.com/multiplication/10/10
-
 import axios from 'axios';
 
 export async function calculate(

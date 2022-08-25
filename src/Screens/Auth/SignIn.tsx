@@ -26,11 +26,7 @@ const SignIn = () => {
     try {
       await auth().signInWithEmailAndPassword(email, password);
     } catch (e) {
-      // if ((e as Error).name === 'UserNotConfirmedException') {
-      //   navigation.navigate('Confirm email', {email});
-      // } else {
       Alert.alert('Oopps', (e as Error).message);
-      // }
     } finally {
       setLoading(false);
       reset();
@@ -63,6 +59,11 @@ const SignIn = () => {
           minLength: {
             value: 3,
             message: 'Password should be minimum 3 characters long',
+          },
+          pattern: {
+            value: /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/,
+            message:
+              'Password must contain at least 1 number, 1 small letter, 1 capital letter, and 1 special characters',
           },
         }}
       />

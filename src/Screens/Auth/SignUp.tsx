@@ -81,6 +81,11 @@ const SignUp = () => {
             value: 8,
             message: 'Password should be at least 8 characters long',
           },
+          pattern: {
+            value: /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{6,16}$/,
+            message:
+              'Password must contain at least 1 number, 1 small letter, 1 capital letter, and 1 special characters',
+          },
         }}
       />
       <CustomInput

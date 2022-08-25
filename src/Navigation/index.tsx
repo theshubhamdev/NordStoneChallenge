@@ -21,10 +21,10 @@ const Navigation = () => {
   return (
     <NavigationContainer fallback={<Text>Loading...</Text>}>
       <Stack.Navigator screenOptions={{headerShown: false}}>
-        {!user ? (
-          <Stack.Screen name="Auth" component={AuthStackNavigator} />
-        ) : (
+        {user ? (
           <Stack.Screen name="Home" component={BottomTabNavigator} />
+        ) : (
+          <Stack.Screen name="Auth" component={AuthStackNavigator} />
         )}
       </Stack.Navigator>
     </NavigationContainer>

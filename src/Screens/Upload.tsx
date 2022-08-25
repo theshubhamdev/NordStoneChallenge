@@ -1,4 +1,4 @@
-import {View, StyleSheet, Image, Alert} from 'react-native';
+import {View, StyleSheet, Image, Alert, Text} from 'react-native';
 import React, {useState} from 'react';
 import {CustomButton} from '../Components';
 import {
@@ -9,11 +9,14 @@ import {
   CameraOptions,
 } from 'react-native-image-picker';
 import storage from '@react-native-firebase/storage';
+import {useAuthContext} from '../Contexts/AuthContext';
 
 const Upload = () => {
-  const [image, setImage] = useState<Asset[] | undefined>(undefined);
+  const [image, setImage] = useState<Asset[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [transferred, setTransferred] = useState<number | undefined>(undefined);
 
+  const {user, fetchUser} = useAuthContext();
   const openCamera = () => {
     const cameraoptions: CameraOptions = {
       saveToPhotos: true,
@@ -30,7 +33,7 @@ const Upload = () => {
         Alert.alert('Error', 'Unknown error');
       } else {
         const source = response.assets;
-        setImage(source);
+        setImage(source || []);
       }
     });
   };
@@ -52,35 +55,92 @@ const Upload = () => {
         Alert.alert('Error', 'Unknown error');
       } else {
         const source = response.assets;
-        setImage(source);
+        setImage(source || []);
       }
     });
   };
 
+  const updateUserImage = async () => {
+    const url = await handleUploadImage();
+    await user?.updateProfile({
+      photoURL: url,
+    });
+    if (fetchUser) {
+      fetchUser();
+    }
+  };
+
   const handleUploadImage = async () => {
-    if (uploading) {
+    if (!image || !image[0].uri) {
       return;
     }
-    if (image && image[0].uri) {
-      setUploading(true);
-      const task = await storage().ref(image[0].fileName).putFile(image[0].uri);
-      console.log('task', task);
+    const uploadUri = image[0].uri;
+    let filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+
+    // Add timestamp to File Name
+    const extension = filename.split('.').pop();
+    const name = filename.split('.').slice(0, -1).join('.');
+    filename = name + Date.now() + '.' + extension;
+
+    setUploading(true);
+    setTransferred(0);
+
+    const storageRef = storage().ref(`photos/${filename}`);
+    const task = storageRef.putFile(uploadUri);
+
+    // Set transferred state
+    task.on('state_changed', taskSnapshot => {
+      console.log(
+        `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+      );
+
+      setTransferred(
+        Math.round(taskSnapshot.bytesTransferred / taskSnapshot.totalBytes) *
+          100,
+      );
+    });
+
+    try {
+      await task;
+
+      const url = await storageRef.getDownloadURL();
+
       setUploading(false);
-    } else {
-      Alert.alert('Uploading failed', 'Select an Image');
+      setImage([]);
+
+      // Alert.alert(
+      //   'Image uploaded!',
+      //   'Your image has been uploaded to the Firebase Cloud Storage Successfully!',
+      // );
+      return url;
+    } catch (e) {
+      console.log(e);
+      return null;
     }
   };
 
   return (
     <View style={styles.root}>
-      {image && <Image style={styles.image} source={{uri: image[0].uri}} />}
+      {(image.length || user?.photoURL) && (
+        <Image
+          style={styles.image}
+          source={{uri: image[0]?.uri || user?.photoURL || ''}}
+        />
+      )}
       <View>
         <CustomButton text="Open Camera" onPress={openCamera} />
         <CustomButton text="Open Gallery" onPress={selectImage} />
         <CustomButton
-          text={uploading ? 'Uploading' : 'Upload'}
-          onPress={handleUploadImage}
+          text={uploading ? 'Uploading...' : 'Upload'}
+          onPress={updateUserImage}
         />
+        {uploading ? (
+          <Text style={{fontSize: 20, color: 'white'}}>
+            {transferred}% Completed
+          </Text>
+        ) : (
+          <></>
+        )}
       </View>
     </View>
   );

@@ -8,10 +8,12 @@ type UserType = FirebaseAuthTypes.User | null | undefined;
 
 type AuthContextType = {
   user: UserType;
+  fetchUser: (() => void) | undefined;
 };
 
 const AuthContext = createContext<AuthContextType>({
   user: undefined,
+  fetchUser: undefined,
 });
 
 const AuthContextProvider = ({children}: {children: ReactNode}) => {
@@ -34,12 +36,20 @@ const AuthContextProvider = ({children}: {children: ReactNode}) => {
     }
   }
 
+  const fetchUser = async () => {
+    setUser(auth().currentUser);
+  };
+
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber; // unsubscribe on unmount
   }, []);
 
-  return <AuthContext.Provider value={{user}}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{user, fetchUser}}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export default AuthContextProvider;
