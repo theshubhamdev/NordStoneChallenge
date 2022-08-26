@@ -8,7 +8,7 @@ export type RootNavigatorParamList = {
 };
 
 export type BottomTabNavigatorParamList = {
-  Home: undefined;
+  Notification: undefined;
   Upload: undefined;
   Message: undefined;
   Calculator: undefined;

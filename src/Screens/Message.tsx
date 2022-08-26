@@ -71,7 +71,10 @@ const Message = () => {
   };
   return (
     <View style={styles.root}>
-      <FlatList data={messages} renderItem={renderItem} />
+      <FlatList
+        data={messages.filter(msg => user?.uid === msg.userId)}
+        renderItem={renderItem}
+      />
       <CustomInput
         name="message"
         control={control}

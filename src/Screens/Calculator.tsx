@@ -50,11 +50,13 @@ const Calculator = () => {
         name="number1"
         control={control}
         placeholder="Enter a number"
+        type="numeric"
       />
       <CustomInput
         name="number2"
         control={control}
         placeholder="Enter a number"
+        type="numeric"
       />
       <DropDownPicker
         open={open}

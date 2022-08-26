@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, TextInput, StyleSheet} from 'react-native';
+import {View, Text, TextInput, StyleSheet, KeyboardType} from 'react-native';
 import {Control, Controller, FieldValues, Path} from 'react-hook-form';
 
 interface ICustomInput<T extends FieldValues> {
@@ -8,6 +8,7 @@ interface ICustomInput<T extends FieldValues> {
   rules?: {};
   placeholder?: string;
   secureTextEntry?: boolean;
+  type?: KeyboardType;
 }
 
 function CustomInput<T extends FieldValues>({
@@ -16,6 +17,7 @@ function CustomInput<T extends FieldValues>({
   rules = {},
   placeholder = '',
   secureTextEntry = false,
+  type,
 }: ICustomInput<T>) {
   return (
     <Controller
@@ -37,6 +39,7 @@ function CustomInput<T extends FieldValues>({
               placeholderTextColor={'gray'}
               style={styles.input}
               secureTextEntry={secureTextEntry}
+              keyboardType={type}
             />
           </View>
           {error && (

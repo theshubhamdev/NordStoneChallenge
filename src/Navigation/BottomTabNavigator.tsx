@@ -21,7 +21,7 @@ const BottomTabNavigator = () => {
         tabBarInactiveBackgroundColor: '#000000',
       }}>
       <Tab.Screen
-        name="Home"
+        name="Notification"
         component={Notification}
         options={{
           tabBarIcon: ({color, size}) => (
